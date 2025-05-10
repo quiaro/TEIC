@@ -4,10 +4,10 @@ function Header() {
   return (
     <header className="app-header">
       <div className="logo">
-        <span className="logo-icon">📈</span>
-        <span className="logo-text">Trending News</span>
+        <span className="logo-icon">💯</span>
+        <span className="logo-text">Buena Nota S.A.</span>
       </div>
-      <div className="header-tagline">Discover what's happening right now</div>
+      <div className="header-tagline">Trabajamos en Equipo</div>
     </header>
   );
 }

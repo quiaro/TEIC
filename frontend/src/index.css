@@ -16,8 +16,8 @@
   /* Color Palette */
   --color-light: #ffffff;
   --color-light-accent: #e6f1f6;
-  --color-dark: #4c5c68;
-  --color-dark-accent: #6b7d8a;
+  --color-dark: #5d829d;
+  --color-dark-accent: #97bbd5;
   --color-primary: #61a8c7;
   --color-secondary: #86c5e0;
 }
@@ -100,7 +100,7 @@ select {
   align-items: center;
   padding-top: 1rem;
   padding-bottom: 1rem;
-  background: linear-gradient(90deg, #4c5c68 0%, #61a8c7 100%);
+  background: linear-gradient(90deg, #66849a 0%, #61a8c7 100%);
   color: var(--color-light);
   border-radius: 8px 8px 0 0;
   width: 100%;
