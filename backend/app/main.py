@@ -16,8 +16,11 @@ import markdown
 from langchain_core.messages import HumanMessage, AIMessage
 from app.graph import build_graph, create_agent_state
 from datetime import datetime
+from app.utils.chains import get_company_culture
+from app.utils.chunks import getFirstChunkFromFile
 
 graph = build_graph()
+
 app = FastAPI(title="Trending Information API")
 
 # Add CORS middleware
@@ -28,6 +31,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# TODO:In real life, this content would come from emails, chats or transcripts.
+DATA_FILES = [
+    "app/data/_chat_abel_mesén.txt",
+    "app/data/_chat_francisco_salas.txt",
+    "app/data/_chat_grettel.txt",
+    "app/data/_chat_laura_monestel.txt",
+    "app/data/_chat_luisa_alfaro.txt",
+    "app/data/_chat_maria_jose_alfaro.txt",
+    "app/data/_chat_maritza_ortiz.txt",
+    "app/data/_chat_paola_mora_lopez.txt",
+    "app/data/_chat_robert_monestel.txt",
+]
 
 # Valid team members
 VALID_TEAM_MEMBERS = [
@@ -42,6 +58,30 @@ VALID_TEAM_MEMBERS = [
     "Paola Mora Lopez",
     "Robert Monestel"
 ]
+
+# Initialize during startup
+mr_company_culture = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize company culture and other async components during app startup"""
+
+    # TODO: This data should be more up to date
+    # Get first chunk from each file and join them
+    SAMPLE_CONVERSATIONS = "\n".join(
+        line
+        for file in DATA_FILES
+        for chunk in [getFirstChunkFromFile(
+            file,
+            r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
+            "%d/%m/%y",
+            "day"
+        )]
+        for line in chunk
+    )
+    global mr_company_culture
+    mr_company_culture = await get_company_culture(model="gpt-4.1-mini", conversations=SAMPLE_CONVERSATIONS)
+    mr_company_culture = mr_company_culture.content
 
 async def stream_agent_response(teamMember: str):
     """
@@ -116,6 +156,8 @@ async def get_team_members():
     Returns:
         List of valid team members
     """
+    if mr_company_culture is None:
+        raise HTTPException(status_code=503, detail="Failed to initialize application")
     return {"teamMembers": VALID_TEAM_MEMBERS}
 
 # Determine the frontend build directory 
