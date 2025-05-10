@@ -17,7 +17,6 @@ from langchain_core.messages import HumanMessage, AIMessage
 from app.graph import build_graph, create_agent_state
 from datetime import datetime
 from app.utils.chains import get_company_culture
-from app.utils.chunks import getFirstChunkFromFile
 
 graph = build_graph()
 
@@ -67,21 +66,10 @@ async def startup_event():
     """Initialize company culture and other async components during app startup"""
 
     # TODO: This data should be more up to date
-    # Get first chunk from each file and join them
-    SAMPLE_CONVERSATIONS = "\n".join(
-        line
-        for file in DATA_FILES
-        for chunk in [getFirstChunkFromFile(
-            file,
-            r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
-            "%d/%m/%y",
-            "day"
-        )]
-        for line in chunk
-    )
     global mr_company_culture
-    mr_company_culture = await get_company_culture(model="gpt-4.1-mini", conversations=SAMPLE_CONVERSATIONS)
+    mr_company_culture = await get_company_culture(model="gpt-4.1-mini", data_files=DATA_FILES)
     mr_company_culture = mr_company_culture.content
+    print(mr_company_culture)
 
 
 @app.get("/api/gift-ideas/{teamMember}")
