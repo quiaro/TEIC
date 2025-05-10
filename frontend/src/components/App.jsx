@@ -124,9 +124,10 @@ function App() {
           padding: 24px;
           min-height: 0; /* This is crucial for nested flex containers to scroll */
           overflow: hidden; /* Prevent content from spilling out */
+          width: 100%;
         }
         .controls-wrapper {
-          width: 40%;
+          width: 35%;
           min-width: 300px;
           overflow-y: auto; /* Make controls scrollable */
         }
