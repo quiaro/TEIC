@@ -134,6 +134,37 @@ function App() {
           flex: 1;
           overflow-y: auto; /* Make content scrollable */
         }
+
+        /* Custom scrollbar styling */
+        .controls-wrapper::-webkit-scrollbar,
+        .content-wrapper::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .controls-wrapper::-webkit-scrollbar-track,
+        .content-wrapper::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 4px;
+        }
+
+        .controls-wrapper::-webkit-scrollbar-thumb,
+        .content-wrapper::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+
+        .controls-wrapper::-webkit-scrollbar-thumb:hover,
+        .content-wrapper::-webkit-scrollbar-thumb:hover {
+          background: #a1a1a1;
+        }
+
+        /* Firefox scrollbar styling */
+        .controls-wrapper,
+        .content-wrapper {
+          scrollbar-width: thin;
+          scrollbar-color: #c1c1c1 #f1f1f1;
+        }
       `}</style>
     </div>
   );
