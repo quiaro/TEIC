@@ -3,6 +3,11 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from app.utils.mocks import MockCompanyCultureModel
 from app.utils.chunks import getFirstChunkFromFile
+from langchain_community.vectorstores.qdrant import Qdrant
+from langchain_huggingface import HuggingFaceEmbeddings
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams
+from app.utils.chunks import chunkTimeStampedFile
 
 async def get_company_culture(model: str, data_files: list[str]):
     if os.getenv("ENV", "development").lower() == "development":
@@ -34,3 +39,50 @@ async def get_company_culture(model: str, data_files: list[str]):
     company_culture_chain = company_culture_prompt | openai_chat_model
     
     return await company_culture_chain.ainvoke({"conversations": conversations})
+
+
+async def get_conversations_retriever(data_files: list[str], collection_name: str, k: int):
+  model_name = os.getenv("EMBEDDING_MODEL")
+  embedding_dim = os.getenv("EMBEDDING_DIM")
+  timeStampRegex = r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]"
+  dateRegex = "%d/%m/%y"
+  interval = "week"
+  overlap = 2
+
+  if not model_name:
+    raise ValueError("EMBEDDING_MODEL environment variable not set")
+
+  if not embedding_dim:
+    raise ValueError("EMBEDDING_DIM environment variable not set")
+
+  try:
+      embedding_model = HuggingFaceEmbeddings(model_name=model_name)
+      client = QdrantClient(":memory:")
+      client.create_collection(
+          collection_name=collection_name,
+          vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
+      )
+
+      vector_store = Qdrant(
+          client=client,
+          collection_name=collection_name,
+          embeddings=embedding_model,
+      )
+      
+      for filepath in data_files:  
+          chunks = []
+          for i, (start, end, lines) in enumerate(chunkTimeStampedFile(
+              filepath, timeStampRegex, dateRegex, interval, overlap
+          )):
+              if (len(lines) > 0):
+                  chunk = "".join(lines)
+                  chunks.append(chunk)
+          
+          print(f"Adding {len(chunks)} chunks from {filepath}")
+          # vector_store.add_texts(chunks)
+      
+      # return vector_store.as_retriever(search_kwargs={"k": k})  
+      return chunks
+
+  except Exception as e:
+      return str(e)

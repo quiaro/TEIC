@@ -5,18 +5,13 @@ from app.setup.environment import setup
 # Call setup to initialize environment
 setup()
 
-from typing import Dict, List, Optional
+from typing import Optional
 from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import asyncio
-import markdown
-from langchain_core.messages import HumanMessage, AIMessage
-from app.graph import build_graph, create_agent_state
-from datetime import datetime
-from app.setup.data import get_company_culture
+from app.graph import build_graph
+from app.setup.data import get_company_culture, get_conversations_retriever
 
 graph = build_graph()
 
@@ -60,6 +55,7 @@ VALID_TEAM_MEMBERS = [
 
 # Initialize during startup
 mr_company_culture = None
+vector_store_retriever = None
 
 @app.on_event("startup")
 async def startup_event():
@@ -70,6 +66,8 @@ async def startup_event():
     mr_company_culture = await get_company_culture(model="gpt-4.1-mini", data_files=DATA_FILES)
     mr_company_culture = mr_company_culture.content
 
+    global vector_store_retriever
+    vector_store_retriever = await get_conversations_retriever(data_files=DATA_FILES, collection_name="overlapped_conversations", k=6)
 
 @app.get("/api/gift-ideas/{teamMember}")
 async def get_gift_ideas(

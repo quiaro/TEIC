@@ -13,6 +13,9 @@ dependencies = [
     "langchain",
     "langchain-openai",
     "langchain-google-community",
+    "langchain-huggingface>=0.2.0",
+    "qdrant-client>=1.14.2",
+    "langgraph>=0.4.3",
 ]
 
 [project.optional-dependencies]
