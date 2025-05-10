@@ -1,5 +1,5 @@
 ---
-title: Trending Information App - Agent Demo
+title: TEIC
 emoji: 🤖
 colorFrom: indigo
 colorTo: blue
@@ -8,12 +8,12 @@ python_version: 3.13
 app_port: 7860
 app_file: app.main.py
 pinned: false
-short_description: Fetch latest trending information on various categories
+short_description: Team Emotional Intelligence Companion
 ---
 
-# Trending Information App
+# TEIC
 
-This application lets users fetch the latest trending information on various categories. It consists of a FastAPI backend that uses LangGraph to process queries and a React frontend.
+Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large language model (LLM) to analyze team conversations. The goal is to provide managers with actionable, empathetic, and contextually relevant insights relevant to the team's interactions. It consists of a FastAPI backend that uses LangGraph to process queries and a React frontend.
 
 ## Features
 
