@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 from typing import Generator, Tuple, List
-from dates import getDateIntervals
+from app.utils.dates import getDateIntervals
 
 def chunkTimeStampedFile(filepath: str, timeStampRegex: str, dateRegex: str, interval: str, overlap: int) -> Generator[Tuple[datetime, datetime, List[str]], None, None]:
     """
