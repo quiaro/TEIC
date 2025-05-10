@@ -1,6 +1,6 @@
 """FastAPI server for trending information retrieval."""
 import os
-from app.utils.setup import setup
+from app.setup.environment import setup
 
 # Call setup to initialize environment
 setup()
@@ -83,53 +83,26 @@ async def startup_event():
     mr_company_culture = await get_company_culture(model="gpt-4.1-mini", conversations=SAMPLE_CONVERSATIONS)
     mr_company_culture = mr_company_culture.content
 
-async def stream_agent_response(teamMember: str):
-    """
-    Stream the agent's response for a given team member.
-    
-    Args:
-        teamMember: The trending team member to query
-        
-    Yields:
-        Chunks of the agent's response as HTML
-    """
-    # Create the initial prompt
-    prompt = f"Find the top trending topic in Google Trends in the United States related to {teamMember.lower()} in the past 24 hours. Then, get the most relevant information related to this topic from Google and Reddit. The information provided must be up to date. Today is {datetime.now().strftime('%B')} {datetime.now().day}, {datetime.now().year}. "
-    
-    # Initialize state
-    state = create_agent_state(messages=[HumanMessage(content=prompt)])
-    
-    # Process through the graph
-    try:
-        async for chunk in graph.astream(state, stream_mode="updates"):
-            for node, values in chunk.items():
-                # Only yield messages from the agent
-                if node == "agent":
-                    last_message = values["messages"][-1].text()
-                    if last_message != "":
-                        # Convert markdown to HTML
-                        html_content = markdown.markdown(last_message)
-                        yield html_content
-
-    except Exception as e:
-        # Log the error but don't raise it to avoid breaking the stream
-        print(f"Error in streaming response: {str(e)}")
-        yield f"\n\nError during response generation: {str(e)}"
-
 
 @app.get("/api/gift-ideas/{teamMember}")
-async def get_trending(
-    teamMember: str = Path(..., description="The team member to get trending information for")
+async def get_gift_ideas(
+    teamMember: str = Path(..., description="The team member to get gift ideas for")
 ):
     """
-    Get trending information for a specific team member.
+    Get thoughtful gift ideas for a specific team member based on their interests 
+    and aligned with the company culture.
     
     Args:
-        teamMember: The team member to get trending information for
+        teamMember: The team member to get gift ideas for
         
     Returns:
-        A streaming response with trending information as HTML
+        A list with 3 gift ideas. Each gift idea is a dictionary with the following keys:
+        - name: The name of the gift idea
+        - description: A description of the gift idea
+        - link: A link to where it can be purchased
     """
+    gift_ideas = []
+
     # Validate team member
     if teamMember not in VALID_TEAM_MEMBERS:
         raise HTTPException(
@@ -137,16 +110,8 @@ async def get_trending(
             detail=f"Invalid team member. Must be one of: {', '.join(VALID_TEAM_MEMBERS)}"
         )
     
-    # Return streaming response
-    return StreamingResponse(
-        stream_agent_response(teamMember),
-        media_type="text/event-stream",
-        headers={
-            "X-Accel-Buffering": "no",  # Disable buffering for Nginx
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        }
-    )
+    return gift_ideas
+
 
 @app.get("/api/teamMembers")
 async def get_team_members():

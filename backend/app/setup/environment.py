@@ -39,5 +39,4 @@ def setup():
 
     os.environ["OPENAI_API_KEY"] = openai_api_key
     os.environ["GOOGLE_API_KEY"] = google_api_key
-    os.environ["GOOGLE_CSE_ID"] = google_cse_id
-
+    os.environ["GOOGLE_CSE_ID"] = google_cse_id 
