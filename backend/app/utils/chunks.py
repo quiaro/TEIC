@@ -199,23 +199,23 @@ def getFirstChunkFromFile(filepath: str, timeStampRegex: str, dateRegex: str, in
 if __name__ == "__main__":
     # Example usage
     files_to_analyze = [
-        "data/_chat_abel_mesén.txt",
-        "data/_chat_francisco_salas.txt",
-        "data/_chat_grettel.txt",
-        "data/_chat_laura_monestel.txt",
-        "data/_chat_luisa_alfaro.txt",
-        "data/_chat_maria_jose_alfaro.txt",
-        "data/_chat_maritza_ortiz.txt",
-        "data/_chat_paola_mora_lopez.txt",
-        "data/_chat_robert_monestel.txt",
+        "app/data/_chat_abel_mesén.txt",
+        "app/data/_chat_francisco_salas.txt",
+        "app/data/_chat_grettel.txt",
+        "app/data/_chat_laura_monestel.txt",
+        "app/data/_chat_luisa_alfaro.txt",
+        "app/data/_chat_maria_jose_alfaro.txt",
+        "app/data/_chat_maritza_ortiz.txt",
+        "app/data/_chat_paola_mora_lopez.txt",
+        "app/data/_chat_robert_monestel.txt",
     ]
     
     analyzeChunkSizes(
         files_to_analyze,
         r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
         "%d/%m/%y",
-        "day",
-        1
+        "week",
+        2
     )
 
     print("\nTesting getFirstChunkFromFile:")
