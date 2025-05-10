@@ -25,7 +25,7 @@ Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large lang
 ## Project Structure
 
 ```
-/trending-agent
+/TEIC
   /backend             # FastAPI server
     /app
       main.py          # Server endpoints

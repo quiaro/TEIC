@@ -77,7 +77,7 @@ async def stream_agent_response(teamMember: str):
         yield f"\n\nError during response generation: {str(e)}"
 
 
-@app.get("/api/trending/{teamMember}")
+@app.get("/api/gift-ideas/{teamMember}")
 async def get_trending(
     teamMember: str = Path(..., description="The team member to get trending information for")
 ):

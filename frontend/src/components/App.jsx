@@ -53,7 +53,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `/api/trending/${encodeURIComponent(teamMember)}`,
+        `/api/gift-ideas/${encodeURIComponent(teamMember)}`,
         {
           method: 'GET',
           headers: {
