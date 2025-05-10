@@ -115,19 +115,24 @@ function App() {
           height: 100vh;
           display: flex;
           flex-direction: column;
+          overflow: hidden;
         }
         .main-content {
           display: flex;
           flex: 1;
           gap: 24px;
           padding: 24px;
+          min-height: 0; /* This is crucial for nested flex containers to scroll */
+          overflow: hidden; /* Prevent content from spilling out */
         }
         .controls-wrapper {
           width: 40%;
           min-width: 300px;
+          overflow-y: auto; /* Make controls scrollable */
         }
         .content-wrapper {
           flex: 1;
+          overflow-y: auto; /* Make content scrollable */
         }
       `}</style>
     </div>
