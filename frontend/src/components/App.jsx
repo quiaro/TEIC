@@ -97,15 +97,39 @@ function App() {
     <div className="container">
       <Header />
       {teamMembers.length > 0 && (
-        <>
-          <Controls
-            teamMembers={teamMembers}
-            onSubmit={fetchPresents}
-            loading={loading}
-          />
-          <Content presents={presents} loading={loading} />
-        </>
+        <div className="main-content">
+          <div className="controls-wrapper">
+            <Controls
+              teamMembers={teamMembers}
+              onSubmit={fetchPresents}
+              loading={loading}
+            />
+          </div>
+          <div className="content-wrapper">
+            <Content presents={presents} loading={loading} />
+          </div>
+        </div>
       )}
+      <style jsx>{`
+        .container {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .main-content {
+          display: flex;
+          flex: 1;
+          gap: 24px;
+          padding: 24px;
+        }
+        .controls-wrapper {
+          width: 40%;
+          min-width: 300px;
+        }
+        .content-wrapper {
+          flex: 1;
+        }
+      `}</style>
     </div>
   );
 }

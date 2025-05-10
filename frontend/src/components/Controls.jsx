@@ -42,18 +42,20 @@ function Controls({ teamMembers, onSubmit, loading }) {
         .team-members-list {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          padding: 16px;
+          gap: 6px;
+          padding: 8px;
+          width: 100%;
         }
 
         .team-member-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 8px;
+          padding: 8px 16px;
           border-radius: 6px;
           background: #f5f5f5;
           transition: background-color 0.2s ease;
+          min-height: 52px;
         }
 
         .team-member-row:hover {
