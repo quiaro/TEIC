@@ -16,7 +16,7 @@ import markdown
 from langchain_core.messages import HumanMessage, AIMessage
 from app.graph import build_graph, create_agent_state
 from datetime import datetime
-from app.utils.chains import get_company_culture
+from app.setup.data import get_company_culture
 
 graph = build_graph()
 
@@ -69,7 +69,6 @@ async def startup_event():
     global mr_company_culture
     mr_company_culture = await get_company_culture(model="gpt-4.1-mini", data_files=DATA_FILES)
     mr_company_culture = mr_company_culture.content
-    print(mr_company_culture)
 
 
 @app.get("/api/gift-ideas/{teamMember}")

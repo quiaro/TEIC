@@ -1,6 +1,6 @@
+import os
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-import os
 from app.utils.mocks import MockCompanyCultureModel
 from app.utils.chunks import getFirstChunkFromFile
 
