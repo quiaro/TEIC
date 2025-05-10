@@ -1,51 +1,108 @@
 import React, { useState } from 'react';
 
 function Controls({ teamMembers, onSubmit, loading }) {
-  const [selectedTeamMember, setSelectedTeamMember] = useState('');
+  const [hoveredMember, setHoveredMember] = useState(null);
 
-  const handleTeamMemberChange = (e) => {
-    setSelectedTeamMember(e.target.value);
-  };
-
-  const handleSubmit = () => {
-    if (selectedTeamMember) {
-      onSubmit(selectedTeamMember);
+  const handleSubmit = (teamMember) => {
+    if (teamMember) {
+      onSubmit(teamMember);
     }
   };
 
   return (
     <div className="controls">
-      <div className="control-row">
-        <select
-          value={selectedTeamMember}
-          onChange={handleTeamMemberChange}
-          disabled={loading}
-          className="category-select"
-        >
-          <option value="" disabled>
-            Select team member
-          </option>
-          {teamMembers.map((teamMember) => (
-            <option key={teamMember} value={teamMember}>
-              {teamMember}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedTeamMember || loading}
-          className="submit-button"
-        >
-          {loading ? (
-            <>
-              <span className="loading"></span>
-              Processing...
-            </>
-          ) : (
-            'Show me trending information'
-          )}
-        </button>
+      <div className="team-members-list">
+        {teamMembers.map((teamMember) => (
+          <div
+            key={teamMember}
+            className="team-member-row"
+            onMouseEnter={() => setHoveredMember(teamMember)}
+            onMouseLeave={() => setHoveredMember(null)}
+          >
+            <span className="team-member-name">{teamMember}</span>
+            {hoveredMember === teamMember && (
+              <button
+                onClick={() => handleSubmit(teamMember)}
+                disabled={loading}
+                className="gift-button"
+              >
+                {loading ? (
+                  <>
+                    <span className="loading"></span>
+                  </>
+                ) : (
+                  <>🎁</>
+                )}
+              </button>
+            )}
+          </div>
+        ))}
       </div>
+      <style jsx>{`
+        .team-members-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 16px;
+        }
+
+        .team-member-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px;
+          border-radius: 6px;
+          background: #f5f5f5;
+          transition: background-color 0.2s ease;
+        }
+
+        .team-member-row:hover {
+          background: #e8e8e8;
+        }
+
+        .team-member-name {
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        .gift-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          background: #007bff;
+          color: white;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+
+        .gift-button:hover:not(:disabled) {
+          background: #0056b3;
+        }
+
+        .gift-button:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+        }
+
+        .loading {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2px solid #ffffff;
+          border-radius: 50%;
+          border-top-color: transparent;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }
