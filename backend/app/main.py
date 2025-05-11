@@ -8,10 +8,13 @@ setup()
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.graph import build_graph
 from app.setup.data import get_company_culture, get_conversations_retriever
+from app.tools import get_team_member_interests
+from app.utils.chains import get_interests_rag_chain
 
 graph = build_graph()
 
@@ -90,6 +93,7 @@ async def get_gift_ideas(
         - link: A link to where it can be purchased
     """
     gift_ideas = []
+    rag_chain = get_interests_rag_chain(vector_store_retriever)
 
     # Validate team member
     if teamMember not in VALID_TEAM_MEMBERS:
@@ -98,7 +102,30 @@ async def get_gift_ideas(
             detail=f"Invalid team member. Must be one of: {', '.join(VALID_TEAM_MEMBERS)}"
         )
     
-    return gift_ideas
+    async def stream_response():
+        try:
+            query_text = f"Cuáles son 5 de los principales intereses de {teamMember}?"
+            async for chunk in rag_chain.astream({"question": query_text}):
+                print(chunk, end="", flush=True)
+                yield chunk                    
+        except Exception as e:
+            # Log the error but don't raise it to avoid breaking the stream
+            print(f"Error in streaming response: {str(e)}")
+            yield f"\n\nError during response generation: {str(e)}"
+
+    # team_member_interests = get_team_member_interests(vector_store_retriever, teamMember)
+    # print(f"{teamMember}'s interests: {team_member_interests}")
+    
+    return StreamingResponse(
+        stream_response(),
+        media_type="text/event-stream",
+        headers={
+            "X-Accel-Buffering": "no",  # Disable buffering for Nginx
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream"
+        }
+    )
 
 
 @app.get("/api/teamMembers")

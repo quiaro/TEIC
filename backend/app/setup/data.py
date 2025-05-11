@@ -78,11 +78,11 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
                   chunk = "".join(lines)
                   chunks.append(chunk)
           
-          print(f"Adding {len(chunks)} chunks from {filepath}")
-          # vector_store.add_texts(chunks)
+          if os.getenv("DEBUG", "false").lower() == "true":
+              print(f"Adding {len(chunks)} chunks from {filepath}")
+          vector_store.add_texts(chunks)
       
-      # return vector_store.as_retriever(search_kwargs={"k": k})  
-      return chunks
+      return vector_store.as_retriever(search_kwargs={"k": k})  
 
   except Exception as e:
       return str(e)
