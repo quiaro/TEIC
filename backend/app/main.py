@@ -1,5 +1,7 @@
 """FastAPI server for trending information retrieval."""
 import os
+import json
+from functools import partial
 from app.setup.environment import setup
 
 # Call setup to initialize environment
@@ -11,10 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from langchain_openai import ChatOpenAI
+from langchain.agents import AgentExecutor, create_react_agent
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_core.prompts import PromptTemplate
 from app.graph import build_graph
 from app.setup.data import get_company_culture, get_conversations_retriever
-from app.tools import get_team_member_interests
-from app.utils.chains import get_interests_rag_chain
+from app.tools import TeamMemberInterestsTool
 
 graph = build_graph()
 
@@ -93,7 +98,9 @@ async def get_gift_ideas(
         - link: A link to where it can be purchased
     """
     gift_ideas = []
-    rag_chain = get_interests_rag_chain(vector_store_retriever)
+    model_name = os.getenv("GIFT_SUGGESTIONS_LLM")
+    if not model_name:
+        raise ValueError("GIFT_SUGGESTIONS_LLM environment variable not set")
 
     # Validate team member
     if teamMember not in VALID_TEAM_MEMBERS:
@@ -103,22 +110,68 @@ async def get_gift_ideas(
         )
     
     async def stream_response():
-        try:
-            query_text = f"Cuáles son 5 de los principales intereses de {teamMember}?"
-            async for chunk in rag_chain.astream({"question": query_text}):
-                print(chunk, end="", flush=True)
-                yield chunk                    
-        except Exception as e:
-            # Log the error but don't raise it to avoid breaking the stream
-            print(f"Error in streaming response: {str(e)}")
-            yield f"\n\nError during response generation: {str(e)}"
+        # Use a proper ReAct formatted prompt
+        AGENT_PROMPT = """Eres un amigo experto regalando regalos. Puedes sugerir ideas de regalos concretas que no sean demasiado caras o puedes responder que no hay suficiente información en caso de que no sepás suficiente sobre los intereses de la persona. El formato del resultado debe ser una lista de ideas de regalos en JSON, donde cada idea es de la forma:
+        {{
+            name: nombre del regalo,
+            description: una explicación simple de por qué es un buen regalo (máximo 30 palabras),
+        }}
+        
+        Tienes acceso a las siguientes herramientas:
 
-    # team_member_interests = get_team_member_interests(vector_store_retriever, teamMember)
-    # print(f"{teamMember}'s interests: {team_member_interests}")
-    
+        {tools}
+
+        Usa el siguiente formato:
+
+        Question: la pregunta inicial que debes responder
+        Thought: siempre debes pensar qué hacer
+        Action: la acción a tomar, debe ser una de [{tool_names}]
+        Action Input: la entrada para la acción
+        Observation: el resultado de la acción
+        ... (este Thought/Action/Action Input/Observation puede repetirse N veces)
+        Thought: Ahora conozco la respuesta final
+        Final Answer: la respuesta final a la pregunta inicial.
+
+        ¡Comienza!
+
+        Question: {input}
+        Thought: {agent_scratchpad}"""
+        
+        prompt_template = PromptTemplate.from_template(AGENT_PROMPT)
+
+        # Create the agent with the required tools
+        tools = [TeamMemberInterestsTool(vector_store_retriever)]
+        
+        # Create the agent using our custom prompt template
+        agent = create_react_agent(
+            llm=ChatOpenAI(model=model_name, temperature=1.2),
+            tools=tools,
+            prompt=prompt_template,
+        )
+
+        # Initialize the agent with the team member's name
+        agent_executor = AgentExecutor.from_agent_and_tools(
+            agent=agent,
+            tools=tools,
+            verbose=True,
+            handle_parsing_errors=True,
+            max_iterations=7
+        )
+
+        # Stream the agent's response
+        async for chunk in agent_executor.astream(
+            {"input": f"Sugiere 3 regalos para {teamMember}"},
+            config={"callbacks": [StreamingStdOutCallbackHandler()]}
+        ):
+            if "output" in chunk:
+                content = chunk["output"]
+                # Ensure we have proper JSON escaping
+                content_json = json.dumps({"content": content})
+                yield f"{content_json}"
+
     return StreamingResponse(
         stream_response(),
-        media_type="text/event-stream",
+        media_type="text/event-stream; charset=utf-8",
         headers={
             "X-Accel-Buffering": "no",  # Disable buffering for Nginx
             "Cache-Control": "no-cache",
