@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Controls from './Controls';
 import Content from './Content';
 import Header from './Header';
+import Modal from './Modal';
 
 function App() {
   const [presents, setPresents] = useState([]);
@@ -9,6 +10,8 @@ function App() {
   const abortControllerRef = useRef(null);
 
   const [teamMembers, setTeamMembers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTeamMember, setSelectedTeamMember] = useState(null);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -40,6 +43,7 @@ function App() {
   const fetchPresents = async (teamMember) => {
     setLoading(true);
     setPresents('');
+    setSelectedTeamMember(teamMember);
 
     // Abort any previous request
     if (abortControllerRef.current) {
@@ -70,6 +74,9 @@ function App() {
 
       const data = await response.json();
       setPresents(data.giftIdeas);
+
+      // Open the modal when presents are fetched
+      setIsModalOpen(true);
     } catch (error) {
       console.error('Error fetching presents:', error);
       setPresents('Error fetching presents. Please try again.');
@@ -81,6 +88,19 @@ function App() {
           abortControllerRef.current = null;
         }
       }
+    }
+  };
+
+  const closeModal = () => {
+    // Add quick fade-out animation by adding a class
+    const modalOverlay = document.querySelector('.modal-overlay');
+    if (modalOverlay) {
+      modalOverlay.style.animation = 'fadeOut 0.2s ease-out forwards';
+      setTimeout(() => {
+        setIsModalOpen(false);
+      }, 200);
+    } else {
+      setIsModalOpen(false);
     }
   };
 
@@ -101,6 +121,16 @@ function App() {
           </div>
         </div>
       )}
+
+      {isModalOpen && presents.length > 0 && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          teamMember={selectedTeamMember}
+          presents={presents}
+        />
+      )}
+
       <style jsx>{`
         .container {
           height: 100vh;
