@@ -40,23 +40,3 @@ class TeamMemberInterestsTool(BaseTool):
         Runs the synchronous code in a separate thread to avoid blocking.
         """
         return await asyncio.to_thread(self._run, team_member)
-    
-
-@tool
-def google_search(query: str) -> str:
-    """
-    Search Google for information about a topic.
-    
-    Args:
-        query: The search query
-        
-    Returns:
-        A string containing search results
-    """
-    # In a real application, this would use Google's Search API
-    # For this example, we'll simulate the response
-    return f"Google search results for '{query}':\n" + \
-           f"- Latest {query} news and updates\n" + \
-           f"- Top {query} resources and guides\n" + \
-           f"- Expert analysis on {query}\n" + \
-           f"- Recent developments in {query}"
