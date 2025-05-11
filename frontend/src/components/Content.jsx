@@ -12,10 +12,15 @@ function Content({ presents, loading }) {
         </div>
       ) : presents ? (
         <div>
-          <div
-            className="content-data"
-            dangerouslySetInnerHTML={{ __html: presents }}
-          />
+          <h2 className="content-title">Gift Ideas</h2>
+          <div className="content-data">
+            {presents.map((gift, index) => (
+              <div key={index} className="gift-item">
+                <h3>{gift.name}</h3>
+                <p>{gift.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="content-message">

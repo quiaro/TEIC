@@ -4,7 +4,7 @@ import Content from './Content';
 import Header from './Header';
 
 function App() {
-  const [presents, setPresents] = useState('');
+  const [presents, setPresents] = useState([]);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef(null);
 
@@ -58,7 +58,7 @@ function App() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Accept: 'text/event-stream',
+            Accept: 'application/json',
           },
           signal, // Add the abort signal
         }
@@ -68,17 +68,8 @@ function App() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let done, value;
-
-      while (!done) {
-        ({ value, done } = await reader.read());
-        if (signal.aborted || done) break;
-
-        const text = decoder.decode(value, { stream: true });
-        setPresents((prev) => prev + text);
-      }
+      const data = await response.json();
+      setPresents(data.giftIdeas);
     } catch (error) {
       console.error('Error fetching presents:', error);
       setPresents('Error fetching presents. Please try again.');
