@@ -38,7 +38,10 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
           ×
         </button>
         <div className="modal-header">
-          <h2>Ideas de regalo que podrían gustarle a {teamMember}</h2>
+          <h2>
+            Ideas de regalo que podrían gustarle
+            <br /> a {teamMember}
+          </h2>
         </div>
         <div className="modal-content">
           {presents.map((gift, index) => (
@@ -59,7 +62,7 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(0, 0, 0, 0.7);
+          background-color: rgba(0, 0, 0, 0.6);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -68,11 +71,10 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
         }
 
         .modal-container {
-          background: rgba(255, 255, 255, 0.95) url('/celebration-bg.jpg')
-            no-repeat;
-          background-size: cover;
+          background-image: url('/images/celebration-bg.jpg');
           background-position: center;
-          background-blend-mode: overlay;
+          background-size: cover;
+          background-color: rgba(255, 255, 255, 0.95);
           border-radius: 8px;
           width: 90%;
           max-width: 600px;
@@ -90,9 +92,9 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
           background: rgba(255, 255, 255, 0.8);
           border: none;
           border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          font-size: 20px;
+          width: 32px;
+          height: 32px;
+          font-size: 24px;
           cursor: pointer;
           color: #333;
           z-index: 2;
@@ -100,6 +102,7 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
           align-items: center;
           justify-content: center;
           transition: background-color 0.2s ease;
+          padding: 0;
         }
 
         .close-button:hover {
@@ -114,9 +117,9 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
 
         .modal-header h2 {
           font-size: 24px;
-          color: #333;
+          color: #fff;
           text-align: center;
-          text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+          line-height: 1.3;
         }
 
         .modal-content {
@@ -133,15 +136,16 @@ function Modal({ isOpen, onClose, teamMember, presents }) {
         }
 
         .gift-modal-item h3 {
-          font-size: 22px;
+          font-size: 18px;
           margin-bottom: 5px;
           color: #333;
         }
 
         .gift-modal-item p {
-          font-size: 16px;
+          font-size: 14px;
           color: #555;
           margin: 0;
+          line-height: 1.4;
         }
 
         @keyframes fadeIn {
