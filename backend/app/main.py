@@ -41,12 +41,12 @@ DATA_FILES = [
 
 # Valid team members
 VALID_TEAM_MEMBERS = [
-    "Abel Mesén",
+    "Abel",
     "Francisco Salas",
     "Grettel",
     "Laura Monestel",
     "Luisa Alfaro",
-    "David Quirós",
+    "David",
     "Maria José Alfaro",
     "Maritza Ortiz",
     "Paola Mora Lopez",
@@ -68,6 +68,9 @@ async def startup_event():
 
     global vector_store_retriever
     vector_store_retriever = await get_conversations_retriever(data_files=DATA_FILES, collection_name="overlapped_conversations", k=6)
+
+    if mr_company_culture is None or vector_store_retriever is None:
+        raise HTTPException(status_code=503, detail="Failed to initialize application")
 
 @app.get("/api/gift-ideas/{teamMember}")
 async def get_gift_ideas(
@@ -106,8 +109,6 @@ async def get_team_members():
     Returns:
         List of valid team members
     """
-    if mr_company_culture is None:
-        raise HTTPException(status_code=503, detail="Failed to initialize application")
     return {"teamMembers": VALID_TEAM_MEMBERS}
 
 # Determine the frontend build directory 
