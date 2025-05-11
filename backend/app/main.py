@@ -95,9 +95,7 @@ async def get_gift_ideas(
         A list with 3 gift ideas. Each gift idea is a dictionary with the following keys:
         - name: The name of the gift idea
         - description: A description of the gift idea
-        - link: A link to where it can be purchased
     """
-    gift_ideas = []
     model_name = os.getenv("GIFT_SUGGESTIONS_LLM")
     if not model_name:
         raise ValueError("GIFT_SUGGESTIONS_LLM environment variable not set")
@@ -109,76 +107,74 @@ async def get_gift_ideas(
             detail=f"Invalid team member. Must be one of: {', '.join(VALID_TEAM_MEMBERS)}"
         )
     
-    async def stream_response():
-        # Use a proper ReAct formatted prompt
-        AGENT_PROMPT = """Eres un amigo experto regalando regalos. Puedes sugerir ideas de regalos concretas que no sean demasiado caras o puedes responder que no hay suficiente información en caso de que no sepás suficiente sobre los intereses de la persona. El formato del resultado debe ser una lista de ideas de regalos en JSON, donde cada idea es de la forma:
-        {{
-            name: nombre del regalo,
-            description: una explicación simple de por qué es un buen regalo (máximo 30 palabras),
-        }}
-        
-        Tienes acceso a las siguientes herramientas:
+    # Use a proper ReAct formatted prompt
+    AGENT_PROMPT = """Eres un amigo experto regalando regalos. Puedes sugerir ideas de regalos concretas que no sean demasiado caras o puedes responder que no hay suficiente información en caso de que no sepás suficiente sobre los intereses de la persona. El formato del resultado debe ser una lista de ideas de regalos en JSON, donde cada idea es de la forma:
+    {{
+        name: nombre del regalo,
+        description: una explicación simple de por qué es un buen regalo (máximo 30 palabras),
+    }}
+    
+    Tienes acceso a las siguientes herramientas:
 
-        {tools}
+    {tools}
 
-        Usa el siguiente formato:
+    Usa el siguiente formato:
 
-        Question: la pregunta inicial que debes responder
-        Thought: siempre debes pensar qué hacer
-        Action: la acción a tomar, debe ser una de [{tool_names}]
-        Action Input: la entrada para la acción
-        Observation: el resultado de la acción
-        ... (este Thought/Action/Action Input/Observation puede repetirse N veces)
-        Thought: Ahora conozco la respuesta final
-        Final Answer: la respuesta final a la pregunta inicial.
+    Question: la pregunta inicial que debes responder
+    Thought: siempre debes pensar qué hacer
+    Action: la acción a tomar, debe ser una de [{tool_names}]
+    Action Input: la entrada para la acción
+    Observation: el resultado de la acción
+    ... (este Thought/Action/Action Input/Observation puede repetirse N veces)
+    Thought: Ahora conozco la respuesta final
+    Final Answer: la respuesta final a la pregunta inicial.
 
-        ¡Comienza!
+    ¡Comienza!
 
-        Question: {input}
-        Thought: {agent_scratchpad}"""
-        
-        prompt_template = PromptTemplate.from_template(AGENT_PROMPT)
+    Question: {input}
+    Thought: {agent_scratchpad}"""
+    
+    prompt_template = PromptTemplate.from_template(AGENT_PROMPT)
 
-        # Create the agent with the required tools
-        tools = [TeamMemberInterestsTool(vector_store_retriever)]
-        
-        # Create the agent using our custom prompt template
-        agent = create_react_agent(
-            llm=ChatOpenAI(model=model_name, temperature=1.2),
-            tools=tools,
-            prompt=prompt_template,
-        )
-
-        # Initialize the agent with the team member's name
-        agent_executor = AgentExecutor.from_agent_and_tools(
-            agent=agent,
-            tools=tools,
-            verbose=True,
-            handle_parsing_errors=True,
-            max_iterations=7
-        )
-
-        # Stream the agent's response
-        async for chunk in agent_executor.astream(
-            {"input": f"Sugiere 3 regalos para {teamMember}"},
-            config={"callbacks": [StreamingStdOutCallbackHandler()]}
-        ):
-            if "output" in chunk:
-                content = chunk["output"]
-                # Ensure we have proper JSON escaping
-                content_json = json.dumps({"content": content})
-                yield f"{content_json}"
-
-    return StreamingResponse(
-        stream_response(),
-        media_type="text/event-stream; charset=utf-8",
-        headers={
-            "X-Accel-Buffering": "no",  # Disable buffering for Nginx
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "Content-Type": "text/event-stream"
-        }
+    # Create the agent with the required tools
+    tools = [TeamMemberInterestsTool(vector_store_retriever)]
+    
+    # Create the agent using our custom prompt template
+    agent = create_react_agent(
+        llm=ChatOpenAI(model=model_name, temperature=1.2),
+        tools=tools,
+        prompt=prompt_template,
     )
+
+    # Initialize the agent with the team member's name
+    agent_executor = AgentExecutor.from_agent_and_tools(
+        agent=agent,
+        tools=tools,
+        verbose=True,
+        handle_parsing_errors=True,
+        max_iterations=7
+    )
+
+    # Get the agent's response
+    response = await agent_executor.ainvoke(
+        {"input": f"Sugiere 3 regalos para {teamMember}"}
+    )
+    
+    # Extract the output
+    content = response.get("output", "")
+    
+    # Try to parse the JSON from the content
+    try:
+        gift_ideas = json.loads(content)
+
+    except json.JSONDecodeError:
+        # If JSON parsing fails, return an error
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to parse gift ideas from the response"
+        )
+    
+    return {"giftIdeas": gift_ideas}
 
 
 @app.get("/api/teamMembers")
