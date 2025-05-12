@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta
-from typing import Generator, Tuple, List
+from typing import Generator, Tuple, List, Dict
 from app.utils.dates import getDateIntervals
 
 def chunkTimeStampedFile(filepath: str, timeStampRegex: str, dateRegex: str, interval: str, overlap: int) -> Generator[Tuple[datetime, datetime, List[str]], None, None]:
@@ -196,6 +196,29 @@ def getFirstChunkFromFile(filepath: str, timeStampRegex: str, dateRegex: str, in
     
     return chunk_lines
 
+def clean_up_chunks(chunk: str, patterns: Dict[str, str]) -> str:
+    """
+    Removes patterns from a chunk based on provided regular expressions.
+    
+    Args:
+        chunk (str): The text chunk to clean
+        patterns (Dict[str, str]): Dictionary of pattern names to regex patterns
+            that should be removed from the chunk
+            
+    Returns:
+        str: The cleaned chunk with all matching patterns removed
+    """
+    result = chunk
+    
+    # Apply each regex pattern to remove matching content
+    for pattern_name, regex_pattern in patterns.items():
+        # Compile the regex for efficiency
+        compiled_pattern = re.compile(regex_pattern)
+        # Remove all matches of the pattern
+        result = compiled_pattern.sub("", result)
+    
+    return result
+
 if __name__ == "__main__":
     # Example usage
     files_to_analyze = [
@@ -233,4 +256,24 @@ if __name__ == "__main__":
             print(line.strip())
     except Exception as e:
         print(f"Error: {e}")
+
+    # Test clean_up_chunks function
+    print("\nTesting clean_up_chunks:")
+    test_chunk = "[23/2/25, 14:28:56] David: Ok 👍"
+    patterns = {
+        "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]"
+    }
+    cleaned = clean_up_chunks(test_chunk, patterns)
+    print(f"Original: {test_chunk}")
+    print(f"Cleaned:  {cleaned}")
+    
+    # Test with multiple patterns
+    test_chunk2 = "[23/2/25, 14:28:56] David: Ok 👍 https://example.com"
+    patterns2 = {
+        "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
+        "urlRegex": r"https?://\S+"
+    }
+    cleaned2 = clean_up_chunks(test_chunk2, patterns2)
+    print(f"Original: {test_chunk2}")
+    print(f"Cleaned:  {cleaned2}")
 
