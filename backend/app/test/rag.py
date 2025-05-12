@@ -1,11 +1,11 @@
 import json
 import uuid
 from typing import List
-from app.utils.chunks import chunkTimeStampedFile
+from app.utils.chunks import chunkTimeStampedFile, clean_up_string
 
 def generate_test_data(filepaths: List[str], output_file: str = "test_data.json", 
                        timestamp_regex: str = r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]", 
-                       date_format: str = "%d/%m/%y", interval: str = "week", overlap: int = 1) -> None:
+                       date_format: str = "%d/%m/%y", interval: str = "week", overlap: int = 2) -> None:
     """
     Generates test data by chunking timestamp files and saving chunks to a JSON file.
     
@@ -27,6 +27,10 @@ def generate_test_data(filepaths: List[str], output_file: str = "test_data.json"
             )):
                 # Join the lines to create a single text chunk
                 chunk_text = "".join(lines)
+                removePatterns = {
+                  "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
+                }
+                chunk_text = clean_up_string(chunk_text, removePatterns)
                 
                 # Create a sample with unique id and the chunk text
                 sample = {
@@ -63,4 +67,4 @@ if __name__ == "__main__":
         "app/data/_chat_abel_mesén.txt",
     ]
     
-    generate_test_data(files_to_process, "/app/test/test_data.json")
+    generate_test_data(files_to_process, "app/test/test_data.json")
