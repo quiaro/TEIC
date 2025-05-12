@@ -215,7 +215,7 @@ if __name__ == "__main__":
         r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
         "%d/%m/%y",
         "week",
-        2
+        1
     )
 
     print("\nTesting getFirstChunkFromFile:")
