@@ -47,7 +47,7 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
   timeStampRegex = r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]"
   dateRegex = "%d/%m/%y"
   interval = "week"
-  overlap = 1
+  overlap = 2
 
   if not model_name:
     raise ValueError("EMBEDDING_MODEL environment variable not set")
