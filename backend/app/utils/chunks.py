@@ -105,7 +105,7 @@ def analyzeChunkSizes(files: List[str], timeStampRegex: str, dateRegex: str, int
             for i, (start, end, lines) in enumerate(chunkTimeStampedFile(
                 filepath, timeStampRegex, dateRegex, interval, overlap
             )):
-                chunk_size = sum(len(line) for line in lines)
+                chunk_size = sum(len(clean_up_string(line, {"timeStampRegex": timeStampRegex})) for line in lines)
                 all_chunk_sizes.append(chunk_size)
                 print(f"  Chunk {i + 1}: {chunk_size:,} characters")
                 
@@ -196,7 +196,7 @@ def getFirstChunkFromFile(filepath: str, timeStampRegex: str, dateRegex: str, in
     
     return chunk_lines
 
-def clean_up_chunks(chunk: str, patterns: Dict[str, str]) -> str:
+def clean_up_string(chunk: str, patterns: Dict[str, str]) -> str:
     """
     Removes patterns from a chunk based on provided regular expressions.
     
@@ -238,7 +238,7 @@ if __name__ == "__main__":
         r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
         "%d/%m/%y",
         "week",
-        1
+        2
     )
 
     print("\nTesting getFirstChunkFromFile:")
@@ -257,13 +257,13 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error: {e}")
 
-    # Test clean_up_chunks function
-    print("\nTesting clean_up_chunks:")
+    # Test clean_up_string function
+    print("\nTesting clean_up_string:")
     test_chunk = "[23/2/25, 14:28:56] David: Ok 👍"
     patterns = {
         "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]"
     }
-    cleaned = clean_up_chunks(test_chunk, patterns)
+    cleaned = clean_up_string(test_chunk, patterns)
     print(f"Original: {test_chunk}")
     print(f"Cleaned:  {cleaned}")
     
@@ -273,7 +273,7 @@ if __name__ == "__main__":
         "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
         "urlRegex": r"https?://\S+"
     }
-    cleaned2 = clean_up_chunks(test_chunk2, patterns2)
+    cleaned2 = clean_up_string(test_chunk2, patterns2)
     print(f"Original: {test_chunk2}")
     print(f"Cleaned:  {cleaned2}")
 
