@@ -17,10 +17,9 @@ Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large lang
 
 ## Features
 
-- Select from multiple trending categories
-- Streaming responses for real-time information
-- Uses LangGraph to orchestrate a multi-step AI-powered search process
-- Implements a microservice architecture with a frontend and backend
+- Suggest gifts based on team communications
+- Gauge team morale (TO-DO)
+- Gauge alignment to company values (TO-DO)
 
 ## Project Structure
 
@@ -29,7 +28,6 @@ Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large lang
   /backend             # FastAPI server
     /app
       main.py          # Server endpoints
-      graph.py         # LangGraph implementation
       tools.py         # Search tools
     requirements.txt   # Python dependencies
     .env               # Environment variables (create from .env.example)
@@ -121,10 +119,3 @@ Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large lang
   - The file contains `OPENAI_API_KEY=sk-your-actual-api-key-here` with your real API key
   - There are no spaces around the equals sign
   - The API key is valid and has not expired
-
-## Implementation Details
-
-- The backend implements a LangGraph workflow with multiple tools for fetching trending information
-- Environment variables are loaded from a .env file using python-dotenv
-- The frontend makes requests to the backend API and streams the response
-- The components are decoupled for maintainability and scalability

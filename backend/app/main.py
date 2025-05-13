@@ -1,4 +1,3 @@
-"""FastAPI server for trending information retrieval."""
 import os
 import json
 from functools import partial
@@ -20,7 +19,7 @@ from langchain_core.prompts import PromptTemplate
 from app.setup.data import get_company_culture, get_conversations_retriever
 from app.tools import TeamMemberInterestsTool
 
-app = FastAPI(title="Trending Information API")
+app = FastAPI(title="Team Emotional Intelligence Companion")
 
 # Add CORS middleware
 app.add_middleware(
