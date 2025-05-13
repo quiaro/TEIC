@@ -120,14 +120,14 @@ if __name__ == "__main__":
 
     data_files = [
         "app/data/_chat_abel_mesén.txt",
-        # "app/data/_chat_francisco_salas.txt",
-        # "app/data/_chat_grettel.txt",
-        # "app/data/_chat_laura_monestel.txt",
-        # "app/data/_chat_luisa_alfaro.txt",
-        # "app/data/_chat_maria_jose_alfaro.txt",
-        # "app/data/_chat_maritza_ortiz.txt",
-        # "app/data/_chat_paola_mora_lopez.txt",
-        # "app/data/_chat_robert_monestel.txt",
+        "app/data/_chat_francisco_salas.txt",
+        "app/data/_chat_grettel.txt",
+        "app/data/_chat_laura_monestel.txt",
+        "app/data/_chat_luisa_alfaro.txt",
+        "app/data/_chat_maria_jose_alfaro.txt",
+        "app/data/_chat_maritza_ortiz.txt",
+        "app/data/_chat_paola_mora_lopez.txt",
+        "app/data/_chat_robert_monestel.txt",
     ]
 
     custom_run_config = RunConfig(timeout=360)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     retriever = asyncio.run(get_conversations_retriever(baseline_embedding_model, data_files, 6))
     graph = build_test_graph(retriever)
 
-    with open("app/test/test_samples-small.json", "r") as f:
+    with open("app/test/test_samples.json", "r") as f:
         data = json.load(f)
         samples = data["samples"]
     
@@ -144,8 +144,6 @@ if __name__ == "__main__":
             response = graph.invoke({"question": sample["user_input"]})
             sample["response"] = response["response"]
             sample["retrieved_contexts"] = [chunk.page_content for chunk in response["context"]]
-
-        print(samples)
 
         dataset = pd.DataFrame(samples)
         evaluation_dataset = EvaluationDataset.from_pandas(dataset)
