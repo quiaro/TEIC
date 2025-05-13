@@ -111,12 +111,6 @@ Leverage a Retrieval Augmented Generation (RAG) pipeline powered by a large lang
 
 4. Open your browser and go to http://localhost:3000
 
-## Usage
-
-1. Select a category from the dropdown menu
-2. Click "Show me trending information"
-3. View the real-time streaming response in the content section
-
 ## Troubleshooting
 
 ### Common Issues
