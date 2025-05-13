@@ -33,7 +33,7 @@ app.add_middleware(
 
 # TODO:In real life, this content would come from emails, chats or transcripts.
 DATA_FILES = [
-    "app/data/_chat_abel_mesén.txt",
+    "app/data/_chat_abel_mesen.txt",
     "app/data/_chat_francisco_salas.txt",
     "app/data/_chat_grettel.txt",
     "app/data/_chat_laura_monestel.txt",
