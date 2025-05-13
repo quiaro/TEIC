@@ -1,5 +1,6 @@
 import os
 import asyncio
+import json
 from langgraph.graph import START, StateGraph
 from typing_extensions import List, TypedDict
 from langchain_openai import ChatOpenAI
@@ -11,6 +12,10 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from app.utils.chunks import chunkTimeStampedFile, clean_up_string
 from app.setup.environment import setup
+from ragas import EvaluationDataset, evaluate, RunConfig
+from ragas.llms import LangchainLLMWrapper
+from ragas.metrics import LLMContextRecall, Faithfulness, FactualCorrectness, ResponseRelevancy, ContextEntityRecall, NoiseSensitivity
+import pandas as pd
 
 # Call setup to initialize environment
 setup()
@@ -20,7 +25,8 @@ class State(TypedDict):
   context: List[str]
   response: str
 
-llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
+model_name = os.getenv("ANSWERS_LLM")
+llm = ChatOpenAI(model=model_name, temperature=0)
 
 async def get_conversations_retriever(model_name: str, data_files: list[str], k: int):
   embedding_dim = os.getenv("EMBEDDING_DIM")
@@ -103,6 +109,15 @@ def build_test_graph(retriever: VectorStoreRetriever):
 
 if __name__ == "__main__":
     baseline_embedding_model = os.getenv("EMBEDDING_MODEL")
+
+    if not baseline_embedding_model:
+        raise ValueError("EMBEDDING_MODEL environment variable not set")
+
+    judge_model_name = os.getenv("JUDGE_LLM")
+
+    if not judge_model_name:
+        raise ValueError("JUDGE_LLM environment variable not set")
+
     data_files = [
         "app/data/_chat_abel_mesén.txt",
         # "app/data/_chat_francisco_salas.txt",
@@ -115,8 +130,31 @@ if __name__ == "__main__":
         # "app/data/_chat_robert_monestel.txt",
     ]
 
-    
+    custom_run_config = RunConfig(timeout=360)
+    evaluator_llm = LangchainLLMWrapper(ChatOpenAI(model=judge_model_name))
+
     retriever = asyncio.run(get_conversations_retriever(baseline_embedding_model, data_files, 6))
     graph = build_test_graph(retriever)
-    response = graph.invoke({"question": "Qué le interesa a Abel?"})
-    print(response["response"])
+
+    with open("app/test/test_samples-small.json", "r") as f:
+        data = json.load(f)
+        samples = data["samples"]
+    
+        for sample in samples:
+            response = graph.invoke({"question": sample["user_input"]})
+            sample["response"] = response["response"]
+            sample["retrieved_contexts"] = [chunk.page_content for chunk in response["context"]]
+
+        print(samples)
+
+        dataset = pd.DataFrame(samples)
+        evaluation_dataset = EvaluationDataset.from_pandas(dataset)
+
+        result = evaluate(
+            dataset=evaluation_dataset,
+            metrics=[LLMContextRecall(), Faithfulness(), FactualCorrectness(), ResponseRelevancy(), ContextEntityRecall(), NoiseSensitivity()],
+            llm=evaluator_llm,
+            run_config=custom_run_config
+        )
+
+        print(result)
