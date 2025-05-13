@@ -17,6 +17,7 @@ dependencies = [
     "qdrant-client>=1.14.2",
     "langgraph>=0.4.3",
     "pandas>=2.2.3",
+    "ragas>=0.2.15",
 ]
 
 [project.optional-dependencies]
