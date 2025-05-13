@@ -32,20 +32,21 @@ def generate_test_samples(filepaths: List[str], output_file: str = "test_data.js
             for _, (_, _, lines) in enumerate(chunkTimeStampedFile(
                 filepath, timestamp_regex, date_format, interval, overlap
             )):
-                # Join the lines to create a single text chunk
-                chunk_text = "".join(lines)
-                removePatterns = {
-                  "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
-                }
-                chunk_text = clean_up_string(chunk_text, removePatterns)
-                
-                # Create a sample with unique id and the chunk text
-                sample = {
-                    "id": str(uuid.uuid4()),
-                    "context": chunk_text
-                }
-                
-                samples.append(sample)
+                if (len(lines) > 0):
+                    # Join the lines to create a single text chunk
+                    chunk_text = "".join(lines)
+                    removePatterns = {
+                    "timeStampRegex": r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]",
+                    }
+                    chunk_text = clean_up_string(chunk_text, removePatterns)
+                    
+                    # Create a sample with unique id and the chunk text
+                    sample = {
+                        "id": str(uuid.uuid4()),
+                        "context": chunk_text
+                    }
+                    
+                    samples.append(sample)
                 
         except FileNotFoundError:
             print(f"Error: File not found: {filepath}")
