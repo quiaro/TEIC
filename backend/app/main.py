@@ -17,11 +17,8 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
-from app.graph import build_graph
 from app.setup.data import get_company_culture, get_conversations_retriever
 from app.tools import TeamMemberInterestsTool
-
-graph = build_graph()
 
 app = FastAPI(title="Trending Information API")
 
