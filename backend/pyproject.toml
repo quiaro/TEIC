@@ -16,6 +16,7 @@ dependencies = [
     "langchain-huggingface>=0.2.0",
     "qdrant-client>=1.14.2",
     "langgraph>=0.4.3",
+    "pandas>=2.2.3",
 ]
 
 [project.optional-dependencies]
