@@ -13,8 +13,8 @@ class TeamMemberInterestsTool(BaseTool):
     vector_store_retriever: VectorStoreRetriever
 
     def __init__(self, vector_store_retriever: VectorStoreRetriever):
-        super().__init__(vector_store_retriever=vector_store_retriever)
         self.vector_store_retriever = vector_store_retriever
+        super().__init__()
 
     def _run(self, team_member: str) -> str:
         """
