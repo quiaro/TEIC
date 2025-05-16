@@ -40,7 +40,7 @@ async def get_conversations_retriever(model_name: str, data_files: list[str], k:
     raise ValueError("EMBEDDING_DIM environment variable not set")
 
   try:
-      embedding_model = HuggingFaceEmbeddings(model_name=model_name)
+      embedding_model = HuggingFaceEmbeddings(model_name=model_name, model_kwargs={"trust_remote_code": True}, encode_kwargs={"normalize_embeddings": True})
       client = QdrantClient(":memory:")
       client.create_collection(
           collection_name=collection_name,

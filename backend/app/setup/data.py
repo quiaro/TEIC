@@ -59,7 +59,7 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
       # Convert embedding_dim to integer
       embedding_dim = int(embedding_dim)
       
-      embedding_model = HuggingFaceEmbeddings(model_name=model_name)
+      embedding_model = HuggingFaceEmbeddings(model_name=model_name, model_kwargs={"trust_remote_code": True}, encode_kwargs={"normalize_embeddings": True})
       client = QdrantClient(":memory:")
       client.create_collection(
           collection_name=collection_name,
