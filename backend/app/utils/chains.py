@@ -32,7 +32,8 @@ def get_interests_rag_chain(vector_store_retriever: VectorStoreRetriever):
     # Define a function to retrieve context based on the question
     def retrieve_context(inputs):
         question = inputs["question"]
-        return vector_store_retriever.invoke(question)
+        docs = vector_store_retriever.invoke(question)
+        return "\n\n".join(doc.page_content for doc in docs)
 
     # Create the RAG chain using the current API
     return (
