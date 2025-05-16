@@ -1,9 +1,0 @@
-{
-    "anchor": "A person on a horse jumps over a broken down airplane.",
-    "positive": ["A person is outdoors, \non a horse.", "There's a broken down \nairplane on the ground."]
-}
-{
-    "anchor": "Qué tipo de cosas le interesan a Robert Monestel?",
-    "positive": [" Robert Monestel: ‎Los mensajes y las llamadas están cifrados de extremo a extremo."
-  ]
-}
