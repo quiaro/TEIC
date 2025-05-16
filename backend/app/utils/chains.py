@@ -29,8 +29,16 @@ def get_interests_rag_chain(vector_store_retriever: VectorStoreRetriever):
         temperature=0
     )
 
+    # Define a function to retrieve context based on the question
+    def retrieve_context(inputs):
+        question = inputs["question"]
+        return vector_store_retriever.invoke(question)
+
+    # Create the RAG chain using the current API
     return (
-        {"context": itemgetter("question") | vector_store_retriever, "question": itemgetter("question")}
-        | RunnablePassthrough.assign(context=itemgetter("context"))
-        | rag_prompt_template | rag_llm | StrOutputParser()
+        RunnablePassthrough()
+        | {"context": retrieve_context, "question": itemgetter("question")}
+        | rag_prompt_template
+        | rag_llm
+        | StrOutputParser()
     )
