@@ -56,6 +56,9 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
     raise ValueError("EMBEDDING_DIM environment variable not set")
 
   try:
+      # Convert embedding_dim to integer
+      embedding_dim = int(embedding_dim)
+      
       embedding_model = HuggingFaceEmbeddings(model_name=model_name)
       client = QdrantClient(":memory:")
       client.create_collection(
@@ -85,4 +88,5 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
       return vector_store.as_retriever(search_kwargs={"k": k})  
 
   except Exception as e:
-      return str(e)
+      # Raise the exception instead of returning it as a string
+      raise Exception(f"Error creating vector store retriever: {str(e)}")

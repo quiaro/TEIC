@@ -16,6 +16,7 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
+from langchain_core.vectorstores import VectorStoreRetriever
 from app.setup.data import get_company_culture, get_conversations_retriever
 from app.tools import TeamMemberInterestsTool
 
@@ -72,6 +73,10 @@ async def startup_event():
 
     global vector_store_retriever
     vector_store_retriever = await get_conversations_retriever(data_files=DATA_FILES, collection_name="overlapped_conversations", k=6)
+
+    # Validate that we have a proper vector store retriever
+    if not isinstance(vector_store_retriever, VectorStoreRetriever):
+        raise ValueError(f"Failed to initialize vector store retriever. Got {type(vector_store_retriever)} instead.")
 
     if mr_company_culture is None or vector_store_retriever is None:
         raise HTTPException(status_code=503, detail="Failed to initialize application")
