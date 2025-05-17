@@ -45,7 +45,7 @@ async def get_conversations_retriever(model_name: str, data_files: list[str], k:
   try:
       # Use Cohere embeddings (default model is multilingual: embed-multilingual-v3.0)
       embedding_model = CohereEmbeddings(
-          model="embed-multilingual-v3.0",
+          model=model_name,
           cohere_api_key=cohere_api_key
       )
 
