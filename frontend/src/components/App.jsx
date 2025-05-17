@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Controls from './Controls';
-import Content from './Content';
 import Header from './Header';
 import Modal from './Modal';
 
@@ -116,9 +115,6 @@ function App() {
               loading={loading}
             />
           </div>
-          <div className="content-wrapper">
-            <Content presents={presents} loading={loading} />
-          </div>
         </div>
       )}
 
@@ -148,7 +144,7 @@ function App() {
           width: 100%;
         }
         .controls-wrapper {
-          width: 35%;
+          width: 100%;
           min-width: 300px;
           overflow-y: auto; /* Make controls scrollable */
         }
