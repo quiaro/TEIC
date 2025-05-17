@@ -6,8 +6,8 @@ from typing_extensions import List, TypedDict
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
+from langchain_cohere import CohereEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from app.utils.chunks import chunkTimeStampedFile, clean_up_string
@@ -39,8 +39,16 @@ async def get_conversations_retriever(model_name: str, data_files: list[str], k:
   if not embedding_dim:
     raise ValueError("EMBEDDING_DIM environment variable not set")
 
+  if not cohere_api_key:
+    raise ValueError("COHERE_API_KEY environment variable not set")
+
   try:
-      embedding_model = HuggingFaceEmbeddings(model_name=model_name, model_kwargs={"trust_remote_code": True}, encode_kwargs={"normalize_embeddings": True})
+      # Use Cohere embeddings (default model is multilingual: embed-multilingual-v3.0)
+      embedding_model = CohereEmbeddings(
+          model="embed-multilingual-v3.0",
+          cohere_api_key=cohere_api_key
+      )
+
       client = QdrantClient(":memory:")
       client.create_collection(
           collection_name=collection_name,

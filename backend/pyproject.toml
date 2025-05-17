@@ -23,6 +23,7 @@ dependencies = [
     "accelerate>=1.6.0",
     "wandb>=0.19.11",
     "datasets>=3.6.0",
+    "langchain-cohere>=0.4.4",
 ]
 
 [project.optional-dependencies]

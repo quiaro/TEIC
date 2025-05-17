@@ -4,7 +4,7 @@ from langchain.prompts import ChatPromptTemplate
 from app.utils.mocks import MockCompanyCultureModel
 from app.utils.chunks import getFirstChunkFromFile
 from langchain_community.vectorstores.qdrant import Qdrant
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_cohere import CohereEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from app.utils.chunks import chunkTimeStampedFile
@@ -44,6 +44,8 @@ async def get_company_culture(model: str, data_files: list[str]):
 async def get_conversations_retriever(data_files: list[str], collection_name: str, k: int):
   model_name = os.getenv("EMBEDDING_MODEL")
   embedding_dim = os.getenv("EMBEDDING_DIM")
+  cohere_api_key=os.getenv("COHERE_API_KEY")
+
   timeStampRegex = r"\[(\d{1,2}/\d{1,2}/\d{2}), \d{1,2}:\d{2}:\d{2}(?:.AM|.PM)?\]"
   dateRegex = "%d/%m/%y"
   interval = "week"
@@ -55,11 +57,19 @@ async def get_conversations_retriever(data_files: list[str], collection_name: st
   if not embedding_dim:
     raise ValueError("EMBEDDING_DIM environment variable not set")
 
+  if not cohere_api_key:
+    raise ValueError("COHERE_API_KEY environment variable not set")
+
   try:
+      # Use Cohere embeddings (default model is multilingual: embed-multilingual-v3.0)
+      embedding_model = CohereEmbeddings(
+          model="embed-multilingual-v3.0",
+          cohere_api_key=cohere_api_key
+      )
+
       # Convert embedding_dim to integer
       embedding_dim = int(embedding_dim)
       
-      embedding_model = HuggingFaceEmbeddings(model_name=model_name, model_kwargs={"trust_remote_code": True}, encode_kwargs={"normalize_embeddings": True})
       client = QdrantClient(":memory:")
       client.create_collection(
           collection_name=collection_name,
